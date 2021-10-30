@@ -6,9 +6,15 @@ fn main() -> io::Result<()> {
 
     let x: Vec<_> = buffer
         .lines()
-        .filter(|line| line.split('\t').count() > 3)
-        .map(|line| line.split('\t').skip(2).collect::<Vec<_>>().join("\t"))
+        .filter_map(|line| {
+            if line.split('\t').count() > 3 {
+                Some(line.split('\t').skip(2).collect::<Vec<_>>().join("\t"))
+            } else {
+                None
+            }
+        })
         .collect();
+    dbg!(&x);
     println!("{}", x.join("\n"));
     Ok(())
 }
