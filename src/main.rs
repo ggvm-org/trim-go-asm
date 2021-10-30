@@ -7,7 +7,7 @@ fn main() -> io::Result<()> {
     let x: Vec<_> = buffer
         .lines()
         .filter_map(|line| {
-            if line.split('\t').count() > 3 {
+            if line.split('\t').count() > 2 {
                 Some(line.split('\t').skip(2).collect::<Vec<_>>().join("\t"))
             } else {
                 None

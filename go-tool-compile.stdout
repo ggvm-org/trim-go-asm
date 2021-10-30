@@ -10,6 +10,7 @@ LEAQ	8(SP), BP
 FUNCDATA	$0, gclocals·33cdeccccebe80329f1fdbee7f5874cb(SB)
 FUNCDATA	$1, gclocals·33cdeccccebe80329f1fdbee7f5874cb(SB)
 PCDATA	$1, $0
+NOP
 CALL	runtime.printlock(SB)
 MOVQ	$3, (SP)
 CALL	runtime.printint(SB)
@@ -17,6 +18,8 @@ CALL	runtime.printnl(SB)
 CALL	runtime.printunlock(SB)
 MOVQ	8(SP), BP
 ADDQ	$16, SP
+RET
+NOP
 PCDATA	$1, $-1
 PCDATA	$0, $-2
 CALL	runtime.morestack_noctxt(SB)
