@@ -18,7 +18,15 @@ fn main() -> io::Result<()> {
             if line.split('\t').count() > 2 {
                 // skip(2) means
                 // Let "	0x0009 00009 (x.go:3)	CMPQ	SP, 16(CX)" be trimed to "CMPQ	SP, 16(CX)"
-                Some(line.split('\t').skip(2).collect::<Vec<_>>().join("\t"))
+                Some(
+                    line
+                        // Optimize for me
+                        // .replace("\"\".", "main·")
+                        .split('\t')
+                        .skip(2)
+                        .collect::<Vec<_>>()
+                        .join("\t"),
+                )
             } else {
                 None
             }
