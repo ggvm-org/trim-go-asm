@@ -1,4 +1,7 @@
-use std::io::{self, stdin, Read};
+use std::{
+    io::{self, stdin, Read},
+    process,
+};
 
 use clap::{App, Arg};
 
@@ -77,11 +80,16 @@ JMP	0"#,
         )
         .arg(
             Arg::new("REMOVE_PCDATA_FUNCDATA")
-                .about("Remove PCDATA and FUNCDATA insts")
+                .about("Remove PCDATA and FUNCDATA insts, if you want to enable this option, you must enable --tg too.")
                 .takes_value(false)
                 .long("rpf"),
         )
         .get_matches();
+
+    if matches.is_present("REMOVE_PCDATA_FUNCDATA") && !matches.is_present("TRIM_GOROUTINE") {
+        eprintln!("if --rpf is enabled, you must enable --tg");
+        process::exit(1)
+    }
 
     let trim_goroutine_fn = if matches.is_present("TRIM_GOROUTINE") {
         trim_goroutine_instructions
