@@ -34,7 +34,6 @@ fn replace_abiinternal(inst_str: String) -> String {
 }
 
 fn remove_pcdata_funcdata(inst: Vec<String>) -> Vec<String> {
-    dbg!(&inst);
     inst.into_iter()
         .filter(|ins| !ins.starts_with("FUNCDATA") && !ins.starts_with("PCDATA"))
         .collect()
@@ -124,6 +123,7 @@ JMP	0"#,
                         // Optimize for me
                         // .replace("\"\".", "main·")
                         .split('\t')
+                        // Skip "	0x0009 00009 (x.go:3)	"
                         .skip(2)
                         .collect::<Vec<_>>()
                         .join("\t"),
