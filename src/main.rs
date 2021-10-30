@@ -33,6 +33,13 @@ fn replace_abiinternal(inst_str: String) -> String {
     inst_str.replace("ABIInternal", "4")
 }
 
+fn remove_pcdata_funcdata(inst: Vec<String>) -> Vec<String> {
+    dbg!(&inst);
+    inst.into_iter()
+        .filter(|ins| !ins.starts_with("FUNCDATA") && !ins.starts_with("PCDATA"))
+        .collect()
+}
+
 fn identity<T>(v: T) -> T {
     v
 }
@@ -69,6 +76,12 @@ JMP	0"#,
                 .takes_value(false)
                 .long("ra"),
         )
+        .arg(
+            Arg::new("REMOVE_PCDATA_FUNCDATA")
+                .about("Remove PCDATA and FUNCDATA insts")
+                .takes_value(false)
+                .long("rpf"),
+        )
         .get_matches();
 
     let trim_goroutine_fn = if matches.is_present("TRIM_GOROUTINE") {
@@ -79,6 +92,12 @@ JMP	0"#,
 
     let replace_abi_fn = if matches.is_present("REPLACE_ABIINTERNAL") {
         replace_abiinternal
+    } else {
+        identity
+    };
+
+    let remove_pcdata_func_data_fn = if matches.is_present("REMOVE_PCDATA_FUNCDATA") {
+        remove_pcdata_funcdata
     } else {
         identity
     };
@@ -116,6 +135,7 @@ JMP	0"#,
         .collect();
     dbg!(&x);
     let x = trim_goroutine_fn(x);
+    let x = remove_pcdata_func_data_fn(x);
     let x = replace_abi_fn(x.join("\n"));
     println!("{}", x);
 
