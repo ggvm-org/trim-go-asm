@@ -28,6 +28,15 @@ fn trim_goroutine_instructions(instructions: Vec<String>) -> Vec<String> {
         .collect()
 }
 
+fn replace_abiinternal(inst_str: String) -> String {
+    // 4 means NOSPLIT
+    inst_str.replace("ABIInternal", "4")
+}
+
+fn identity<T>(v: T) -> T {
+    v
+}
+
 fn main() -> io::Result<()> {
     let matches = App::new("trim-go-asm")
         .version("0.1")
@@ -54,9 +63,25 @@ JMP	0"#,
                 .takes_value(false)
                 .long("tg"),
         )
+        .arg(
+            Arg::new("REPLACE_ABIINTERNAL")
+                .about("Replace `ABIInternal` to 4(NOSPLIT)")
+                .takes_value(false)
+                .long("ra"),
+        )
         .get_matches();
 
-    let trim_goroutine_routine = matches.is_present("TRIM_GOROUTINE");
+    let trim_goroutine_fn = if matches.is_present("TRIM_GOROUTINE") {
+        trim_goroutine_instructions
+    } else {
+        identity
+    };
+
+    let replace_abi_fn = if matches.is_present("REPLACE_ABIINTERNAL") {
+        replace_abiinternal
+    } else {
+        identity
+    };
 
     let mut buffer = String::new();
     stdin().read_to_string(&mut buffer)?;
@@ -90,12 +115,9 @@ JMP	0"#,
         })
         .collect();
     dbg!(&x);
-    let x = if trim_goroutine_routine {
-        trim_goroutine_instructions(x)
-    } else {
-        x
-    };
-    println!("{}", x.join("\n"));
+    let x = trim_goroutine_fn(x);
+    let x = replace_abi_fn(x.join("\n"));
+    println!("{}", x);
 
     Ok(())
 }
