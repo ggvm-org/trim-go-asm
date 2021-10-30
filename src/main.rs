@@ -1,6 +1,41 @@
 use std::io::{self, stdin, Read};
 
+use clap::{App, Arg};
+
 fn main() -> io::Result<()> {
+    let matches = App::new("trim-go-asm")
+        .version("0.1")
+        .author("Krouton <me+git@tokinia.me>")
+        .about("Trim Go Assembly from $ go tool compile -S")
+        .arg(
+            Arg::new("TRIM_GOROUTINE")
+                .about(
+                    r#"Trim Goroutine prologue / epilogue
+// Trim these instructions.
+MOVQ	(TLS), CX
+CMPQ	SP, 16(CX)
+PCDATA	$0, $-2
+JLS	70
+PCDATA	$0, $-1
+// ...
+NOP
+PCDATA	$1, $-1
+PCDATA	$0, $-2
+CALL	runtime.morestack_noctxt(SB)
+PCDATA	$0, $-1
+JMP	0"#,
+                )
+                .takes_value(false)
+                .long("tg"),
+        )
+        .get_matches();
+
+    let trim_goroutine_routine = matches.is_present("TRIM_GOROUTINE");
+
+    if trim_goroutine_routine {
+        todo!()
+    }
+
     let mut buffer = String::new();
     stdin().read_to_string(&mut buffer)?;
 
