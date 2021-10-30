@@ -2,6 +2,32 @@ use std::io::{self, stdin, Read};
 
 use clap::{App, Arg};
 
+fn trim_goroutine_instructions(instructions: Vec<String>) -> Vec<String> {
+    // Skip these instructions (1..=5)
+    // MOVQ	(TLS), CX
+    // CMPQ	SP, 16(CX)
+    // PCDATA	$0, $-2
+    // JLS	70
+    // PCDATA	$0, $-1
+
+    // Skip these instrutions (count - 6 ..= count)
+    // NOP
+    // PCDATA  $1, $-1
+    // PCDATA  $0, $-2
+    // CALL    runtime.morestack_noctxt(SB)
+    // PCDATA  $0, $-1
+    // JMP     0
+
+    let count = instructions.len();
+
+    instructions
+        .into_iter()
+        .enumerate()
+        .filter(|(idx, _)| !(1..=5).contains(idx) && !(count - 6..=count).contains(idx))
+        .map(|(_, line)| line)
+        .collect()
+}
+
 fn main() -> io::Result<()> {
     let matches = App::new("trim-go-asm")
         .version("0.1")
@@ -31,10 +57,6 @@ JMP	0"#,
         .get_matches();
 
     let trim_goroutine_routine = matches.is_present("TRIM_GOROUTINE");
-
-    if trim_goroutine_routine {
-        todo!()
-    }
 
     let mut buffer = String::new();
     stdin().read_to_string(&mut buffer)?;
@@ -68,6 +90,12 @@ JMP	0"#,
         })
         .collect();
     dbg!(&x);
+    let x = if trim_goroutine_routine {
+        trim_goroutine_instructions(x)
+    } else {
+        x
+    };
     println!("{}", x.join("\n"));
+
     Ok(())
 }
