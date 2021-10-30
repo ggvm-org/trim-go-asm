@@ -33,13 +33,22 @@ fn trim_goroutine_instructions(instructions: Vec<String>) -> Vec<String> {
 
 fn replace_abiinternal(inst_str: String) -> String {
     // 4 means NOSPLIT
-    inst_str.replace("ABIInternal", "4")
+    inst_str
+        .replace("NOSPLIT|ABIInternal", "4")
+        .replace("ABIInternal", "4")
 }
 
 fn remove_pcdata_funcdata(inst: Vec<String>) -> Vec<String> {
     inst.into_iter()
         .filter(|ins| !ins.starts_with("FUNCDATA") && !ins.starts_with("PCDATA"))
         .collect()
+}
+
+fn rename_for_mac(inst_str: String) -> String {
+    inst_str
+        .replacen("\"\".", "main·", 1)
+        .replace("\"\".", "")
+        .replace("~", "")
 }
 
 fn identity<T>(v: T) -> T {
@@ -83,7 +92,7 @@ JMP	0"#,
                 .about("Remove PCDATA and FUNCDATA insts, if you want to enable this option, you must enable --tg too.")
                 .takes_value(false)
                 .long("rpf"),
-        )
+        ).arg(Arg::new("FOR_MAC").about("todo!").takes_value(false).long("fm"))
         .get_matches();
 
     if matches.is_present("REMOVE_PCDATA_FUNCDATA") && !matches.is_present("TRIM_GOROUTINE") {
@@ -105,6 +114,12 @@ JMP	0"#,
 
     let remove_pcdata_func_data_fn = if matches.is_present("REMOVE_PCDATA_FUNCDATA") {
         remove_pcdata_funcdata
+    } else {
+        identity
+    };
+
+    let rename_for_mac_fn = if matches.is_present("FOR_MAC") {
+        rename_for_mac
     } else {
         identity
     };
@@ -145,6 +160,7 @@ JMP	0"#,
     let x = trim_goroutine_fn(x);
     let x = remove_pcdata_func_data_fn(x);
     let x = replace_abi_fn(x.join("\n"));
+    let x = rename_for_mac_fn(x);
     println!("{}", x);
 
     Ok(())
