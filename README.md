@@ -1,5 +1,21 @@
 # trim-go-asm
-Trim Go Assembly from $ go tool compile -S
+Trim Go Assembly from `$ go tool compile -S`
+
+### Install
+`$ cargo install trim-go-asm`
+
+### How to use
+Version 0.1 can parse input only from stdin.
+So, `$ go tool compile -S x.go > trim-go-asm` is the most likely use case.
+
+### Contributing
+Any contributions are welcome!
+
+### TODOs
+- [ ] Read from file by option.
+- [ ] Accept `*.go` by option, then run `go tool compile -S <filename>.go | trim-go-asm > <filename>.s`
+- [ ] Specify the output path by `-o`
+- [ ] *THIS IS FOR ME* Add subcommand `for-me`
 
 ```
 USAGE:
