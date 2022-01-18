@@ -6,6 +6,8 @@ use std::{
 
 use clap::ArgMatches;
 
+use crate::tree::{Instruction, Instructions};
+
 pub fn trim_goroutine_instructions(instructions: Vec<String>) -> Vec<String> {
     // Skip these instructions (1..=5)
     // MOVQ	(TLS), CX
@@ -84,6 +86,23 @@ pub fn erase_common(inst_str: String) -> Vec<String> {
         .collect()
 }
 
+pub fn new_erase_common(inst_str: String) -> Instructions {
+    Instructions::new(
+        inst_str
+            .lines()
+            .filter_map(|line| {
+                if line.split('\t').count() > 2 {
+                    let line = line.trim().to_string();
+                    dbg!(&line);
+                    Some(Instruction::from(line))
+                } else {
+                    None
+                }
+            })
+            .collect(),
+    )
+}
+
 pub fn run(matches: ArgMatches) -> io::Result<()> {
     if matches.is_present("REMOVE_PCDATA_FUNCDATA") && !matches.is_present("TRIM_GOROUTINE") {
         eprintln!("if --rpf is enabled, you must enable --tg");
@@ -117,11 +136,15 @@ pub fn run(matches: ArgMatches) -> io::Result<()> {
     let mut inst_str = String::new();
     stdin().read_to_string(&mut inst_str)?;
 
-    let insts = erase_common(inst_str);
-    let insts = trim_goroutine_fn(insts);
-    let insts = remove_pcdata_func_data_fn(insts);
-    let inst_str = replace_abi_fn(insts.join("\n"));
-    let inst_str = rename_for_mac_fn(inst_str);
-    println!("{}", inst_str);
+    let mut insts = new_erase_common(inst_str);
+    dbg!(&insts);
+    dbg!(insts.trim_goroutine_instructions());
+    let insts = insts.optimize_for_me();
+    println!("{}", insts);
+    // let insts = trim_goroutine_fn(insts);
+    // let insts = remove_pcdata_func_data_fn(insts);
+    // let inst_str = replace_abi_fn(insts.join("\n"));
+    // let inst_str = rename_for_mac_fn(inst_str);
+    // println!("{}", inst_str);
     Ok(())
 }

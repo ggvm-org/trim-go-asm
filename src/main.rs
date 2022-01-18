@@ -1,5 +1,6 @@
 use std::io;
 
+mod tree;
 mod trim;
 
 use clap::{App, Arg};
