@@ -24,6 +24,13 @@ impl Instruction {
             ..self
         }
     }
+
+    fn call_middle_dot(self) -> Self {
+        Self {
+            kind: self.kind.call_middle_dot(),
+            ..self
+        }
+    }
 }
 
 impl Deref for Instruction {
@@ -70,8 +77,17 @@ impl Instructions {
         )
     }
 
+    pub fn call_middle_dot(self) -> Self {
+        Self(
+            self.0
+                .into_iter()
+                .map(|inst| Instruction::call_middle_dot(inst))
+                .collect(),
+        )
+    }
+
     pub fn optimize_for_me(self) -> Self {
-        self.rename_for_mac().replace_abi_fn()
+        self.rename_for_mac().replace_abi_fn().call_middle_dot()
     }
 }
 
@@ -151,6 +167,14 @@ impl InstructionKind {
             .replace("\"\".", "")
             .replace("~", "")
             .into()
+    }
+
+    pub fn call_middle_dot(&self) -> Self {
+        if self.contains("CALL") {
+            self.replace(".", "·").into()
+        } else {
+            self.clone()
+        }
     }
 }
 
