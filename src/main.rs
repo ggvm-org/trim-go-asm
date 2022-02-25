@@ -3,17 +3,18 @@ use std::io;
 mod tree;
 mod trim;
 
-use clap::{App, Arg};
+// TODO: Replace deprecated...
+use clap::{App, Arg, Command};
 use trim::run;
 
 fn main() -> io::Result<()> {
-    let matches = App::new("trim-go-asm")
+    let matches = Command::new("trim-go-asm")
         .version("0.1")
         .author("Krouton <me+git@tokinia.me>")
-        .about("Trim Go Assembly from $ go tool compile -S")
+        .help("Trim Go Assembly from $ go tool compile -S")
         .arg(
             Arg::new("TRIM_GOROUTINE")
-                .about(
+                .help(
                     r#"Trim Goroutine prologue / epilogue
 // Trim these instructions.
 MOVQ	(TLS), CX
@@ -34,16 +35,16 @@ JMP	0"#,
         )
         .arg(
             Arg::new("REPLACE_ABIINTERNAL")
-                .about("Replace `ABIInternal` to 4(NOSPLIT)")
+                .help("Replace `ABIInternal` to 4(NOSPLIT)")
                 .takes_value(false)
                 .long("ra"),
         )
         .arg(
             Arg::new("REMOVE_PCDATA_FUNCDATA")
-                .about("Remove PCDATA and FUNCDATA insts, if you want to enable this option, you must enable --tg too.")
+                .help("Remove PCDATA and FUNCDATA insts, if you want to enable this option, you must enable --tg too.")
                 .takes_value(false)
                 .long("rpf"),
-        ).arg(Arg::new("FOR_MAC").about("todo!").takes_value(false).long("fm"))
+        ).arg(Arg::new("FOR_MAC").help("todo!").takes_value(false).long("fm"))
         .get_matches();
     run(matches)?;
     Ok(())
