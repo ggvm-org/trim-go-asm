@@ -1,6 +1,6 @@
 [package]
 name = "trim-go-asm"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Krouton <me+git@tokinia.me>"]
 description = "Trim Go Assembly from $ go tool compile -S"
 rust-version = "1.56"
